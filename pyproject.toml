@@ -1,13 +1,15 @@
 [project]
-name = "converters"
+name = "gbdi-converters"
 version = "0.1.0"
 description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
-    "lcax==2.5.0"
+    "iso3166>=2.1.1",
+    "lcax>=2.5.2",
+    "pyyaml>=6.0.2",
 ]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.6.4",
+]
