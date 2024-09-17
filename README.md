@@ -7,6 +7,7 @@ Repository for converting various data sources for the GBDI app to ingest.
 Current formats supported:
 
 - [Structural Panda](/src/structural_panda.py)
+- [CarbEnMats](/src/carbenmats.py)
 
 ## Usage
 
