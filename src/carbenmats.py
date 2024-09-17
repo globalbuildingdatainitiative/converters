@@ -138,7 +138,7 @@ def get_results(data: dict):
         results[ImpactCategoryKey.gwp][LifeCycleStage.c1] = float(data["GHG_C12_total"]) * 50
     if data["GHG_C34_total"]:
         results[ImpactCategoryKey.gwp][LifeCycleStage.c3] = float(data["GHG_C34_total"]) * 50
-    return results
+    return results if results[ImpactCategoryKey.gwp] else None
 
 def convert_row(row: dict):
     results = get_results(row)
@@ -148,8 +148,8 @@ def convert_row(row: dict):
         classification_system=None,
         format_version=importlib.metadata.version("lcax"),
         id=str(uuid5(NAMESPACE_URL, json.dumps(row))),
-        impact_categories=[ImpactCategoryKey.gwp],
-        life_cycle_stages=list(results[ImpactCategoryKey.gwp].keys()),
+        impact_categories=[ImpactCategoryKey.gwp] if results else [],
+        life_cycle_stages=list(results[ImpactCategoryKey.gwp].keys() if results else []),
         location=get_location(
             row.get("site_country_iso2"), row.get("site_region_local")
         ),
