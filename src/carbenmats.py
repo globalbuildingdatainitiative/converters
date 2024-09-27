@@ -53,7 +53,10 @@ def get_country(data: str) -> Country:
 
 
 def get_location(country: str, city: str):
-    return Location(country=get_country(country), city=city if city and city.lower() != "no data" else None)
+    return Location(
+        country=get_country(country),
+        city=city if city and city.lower() != "no data" else None,
+    )
 
 
 def get_name(name: str | None):
@@ -124,32 +127,48 @@ def get_users(data: str):
 
 
 def get_results(data: dict):
-
     results = {ImpactCategoryKey.gwp: {}}
     if data["GHG_A123_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.a1a3] = float(data["GHG_A123_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.a1a3] = (
+            float(data["GHG_A123_total"]) * 50
+        )
     if data["GHG_A45_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.a4] = float(data["GHG_A45_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.a4] = (
+            float(data["GHG_A45_total"]) * 50
+        )
     if data["GHG_B1234_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.b1] = float(data["GHG_B1234_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.b1] = (
+            float(data["GHG_B1234_total"]) * 50
+        )
     if data["GHG_B67_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.b6] = float(data["GHG_B67_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.b6] = (
+            float(data["GHG_B67_total"]) * 50
+        )
     if data["GHG_C12_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.c1] = float(data["GHG_C12_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.c1] = (
+            float(data["GHG_C12_total"]) * 50
+        )
     if data["GHG_C34_total"]:
-        results[ImpactCategoryKey.gwp][LifeCycleStage.c3] = float(data["GHG_C34_total"]) * 50
+        results[ImpactCategoryKey.gwp][LifeCycleStage.c3] = (
+            float(data["GHG_C34_total"]) * 50
+        )
     return results if results[ImpactCategoryKey.gwp] else None
+
 
 def convert_row(row: dict):
     results = get_results(row)
     project = Project(
         assemblies={},
-        reference_study_period=row["lca_RSP"] if row["lca_RSP"] and row["lca_RSP"].lower() != "no data" else None,
+        reference_study_period=row["lca_RSP"]
+        if row["lca_RSP"] and row["lca_RSP"].lower() != "no data"
+        else None,
         classification_system=None,
         format_version=importlib.metadata.version("lcax"),
         id=str(uuid5(NAMESPACE_URL, json.dumps(row))),
         impact_categories=[ImpactCategoryKey.gwp] if results else [],
-        life_cycle_stages=list(results[ImpactCategoryKey.gwp].keys() if results else []),
+        life_cycle_stages=list(
+            results[ImpactCategoryKey.gwp].keys() if results else []
+        ),
         location=get_location(
             row.get("site_country_iso2"), row.get("site_region_local")
         ),

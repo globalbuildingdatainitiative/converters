@@ -30,6 +30,7 @@ logging.config.dictConfig(
 )
 log = logging.getLogger(__name__)
 
+
 def get_building_typology(_typo: str) -> list[BuildingTypology]:
     typology = []
 
