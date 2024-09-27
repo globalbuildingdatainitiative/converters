@@ -8,6 +8,7 @@ Current formats supported:
 
 - [Structural Panda](/src/structural_panda.py)
 - [CarbEnMats](/src/carbenmats.py)
+- [SLiCE](/src/slice.py)
 
 ## Usage
 
