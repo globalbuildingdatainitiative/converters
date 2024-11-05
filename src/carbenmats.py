@@ -61,7 +61,7 @@ def get_location(country: str, city: str):
 
 def get_name(name: str | None):
     if not name or name.lower() == "no data":
-        return "Unknown"
+        return "Undefined"
     return name
 
 
@@ -189,14 +189,13 @@ def convert_row(row: dict):
             building_typology=get_building_typology(row["bldg_use_subtype"]),
             floors_above_ground=row["bldg_floors_ag"] or 0,
             floors_below_ground=row.get("bldg_floors_bg", None) or None,
-            # heated_floor_area=AreaType(value=0, unit=Unit.m2, definition="Unknown"),
             frame_type=row["bldg_struct_type"],
             general_energy_class=get_general_energy_class(
                 row["bldg_energy_class_general"]
             ),
             roof_type=get_roof_type(row["bldg_roof_type"]),
         ),
-        meta_data={"assessment_year": row["meta_year"]},
+        meta_data={"assessment_year": row["meta_year"], "source": { "name": "CarbEnMats", "url": None}},
         project_phase=ProjectPhase.other,
         results=results,
         software_info=SoftwareInfo(
