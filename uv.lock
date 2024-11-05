@@ -66,7 +66,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "iso3166", specifier = ">=2.1.1" },
-    { name = "lcax", specifier = ">=2.6.0" },
+    { name = "lcax", path = "lcax-2.6.1-cp310-abi3-manylinux_2_34_x86_64.whl" },
     { name = "pyarrow", specifier = ">=17.0.0" },
     { name = "pyyaml", specifier = ">=6.0.2" },
 ]
@@ -85,18 +85,25 @@ wheels = [
 
 [[package]]
 name = "lcax"
-version = "2.6.0"
-source = { registry = "https://pypi.org/simple" }
+version = "2.6.1"
+source = { path = "lcax-2.6.1-cp310-abi3-manylinux_2_34_x86_64.whl" }
 dependencies = [
     { name = "cffi" },
     { name = "pydantic" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/31/b9/645f130b1a11b16fbc6af16fe9dcf117fc17e4c4ed6175d0fdb29ee00be5/lcax-2.6.0-cp310-abi3-macosx_10_12_x86_64.whl", hash = "sha256:57ab1d0391556522e7a38631aab9c6bc2ac747798115fc421fa4b96181326b89", size = 1064998 },
-    { url = "https://files.pythonhosted.org/packages/5d/71/0ace5ccd68fa9b186d2ad99920b9619f61ba8ae51479f309829d01d99ba4/lcax-2.6.0-cp310-abi3-macosx_11_0_arm64.whl", hash = "sha256:a4cf749bb57fa0622f359c423e2e4e957a8719d8253772ec7382e2408bf781ad", size = 1026368 },
-    { url = "https://files.pythonhosted.org/packages/36/1c/1b94e5c3c2aa67c9d0f7febc8eb265e9f819069461ddfdea4d75ea2b7885/lcax-2.6.0-cp310-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7244c88b572f67056b7b5afcc37191b7dd6675529e215e98abb66bcdee469393", size = 1151350 },
-    { url = "https://files.pythonhosted.org/packages/5d/f9/38dacc499bb0d91b3fac8c58164e1066c537237a4b67951cf6f2bf8657b5/lcax-2.6.0-cp310-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:e74d7aa46dc155600347a3e761439a2d145d5ce0a7e6a98d24877ba675961957", size = 1158071 },
-    { url = "https://files.pythonhosted.org/packages/bb/e0/e76efc0258c752ac8b461793a9758a3ec25c19dedffc4f1ddf4d83f54f66/lcax-2.6.0-cp310-abi3-win_amd64.whl", hash = "sha256:0dd8ae057c4c62a365047fee7fe051ec56bb8dab9af9f6766934f927326daa57", size = 913626 },
+    { filename = "lcax-2.6.1-cp310-abi3-manylinux_2_34_x86_64.whl", hash = "sha256:0480fd9c02ae2244a26682f2d2bd1aabcda7be2161823ede604673848b5a0a0a" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cffi" },
+    { name = "datamodel-code-generator", marker = "extra == 'codegen'" },
+    { name = "mdx-include", marker = "extra == 'doc'", specifier = ">=1.4.1,<2.0.0" },
+    { name = "mkdocs-material", marker = "extra == 'doc'", specifier = ">=8.1.4,<9.0.0" },
+    { name = "pydantic", specifier = ">2.0.0" },
+    { name = "pytest", marker = "extra == 'tests'" },
+    { name = "pytest-datafixtures", marker = "extra == 'tests'" },
 ]
 
 [[package]]

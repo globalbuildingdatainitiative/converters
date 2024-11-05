@@ -288,7 +288,7 @@ class LCAxProject(Project):
     def from_row(cls, row: dict):
         return cls(
             id=str(uuid5(NAMESPACE_URL, row["building_archetype_code"])),
-            name="Unknown",
+            name="Undefined",
             location=get_location(row["stock_region_name"]),
             impact_categories=[
                 ImpactCategoryKey.gwp,
@@ -344,6 +344,7 @@ class LCAxProject(Project):
                 ),
                 roof_type=RoofType.unknown,
             ),
+            meta_data={"source": { "name": "SLiCE", "url": None}},
         )
 
 
