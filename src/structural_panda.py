@@ -126,7 +126,7 @@ def convert_row(row: dict):
             general_energy_class=GeneralEnergyClass.unknown,
             roof_type=RoofType.other,
         ),
-        meta_data={"assessment_year": row["Calculation Year"], "source": { "name": "StructuralPanda", "url": None}},
+        meta_data={"assessment": { "year": row["Calculation Year"]}, "source": { "name": "StructuralPanda", "url": None}},
         project_phase=ProjectPhase.other,
         results=results,
         software_info=SoftwareInfo(

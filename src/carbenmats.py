@@ -195,7 +195,7 @@ def convert_row(row: dict):
             ),
             roof_type=get_roof_type(row["bldg_roof_type"]),
         ),
-        meta_data={"assessment_year": row["meta_year"], "source": { "name": "CarbEnMats", "url": None}},
+        meta_data={"assessment": { "year": row["meta_year"]}, "source": { "name": "CarbEnMats", "url": None}},
         project_phase=ProjectPhase.other,
         results=results,
         software_info=SoftwareInfo(
