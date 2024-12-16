@@ -200,25 +200,25 @@ def add_project(row: dict):
                 "quantity_source": row["MaterialQuantitiesComeFrom"],
             },
             "cost": {
-                "total_cost": float(row["ConstructionCost"]) if row["ConstructionCost"] else None,
+                "total_cost": float(row["ConstructionCost"]),
                 "currency": "gbp",
-            },
+            } if row["ConstructionCost"] else None,
             "demolished_area": {
-                "value": float(row["DemolishedGIA"]) if row["DemolishedGIA"] else None,
+                "value": float(row["DemolishedGIA"]),
                 "unit": Unit.m2,
-            },
+            } if row["DemolishedGIA"] else None,
             "newly_built_area": {
-                "value": float(row["NewBuildGIA"]) if row["NewBuildGIA"] else None,
+                "value": float(row["NewBuildGIA"]),
                 "unit": Unit.m2,
-            },
+            } if row["NewBuildGIA"] else None,
             "retrofitted_area": {
-                "value": float(row["RefurbishedGIA"]) if row["RefurbishedGIA"] else None,
+                "value": float(row["RefurbishedGIA"]),
                 "unit": Unit.m2,
-            },
+            } if row["RefurbishedGIA"] else None,
             "project_site_area": {
-                "value": float(row["OverallSiteArea"]) if row["OverallSiteArea"] else None,
+                "value": float(row["OverallSiteArea"]),
                 "unit": Unit.m2,
-            },
+            }if row["OverallSiteArea"] else None,
             "thermal_envelope_area": {
                 "value": float(row["FacadeArea"]) if row["FacadeArea"] else 0 + float(row["RoofArea"]) if row["RoofArea"] else 0,
                 "unit": Unit.m2,
