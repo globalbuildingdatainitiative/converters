@@ -62,7 +62,7 @@ def get_location(country: str, city: str):
 def get_name(name: str | None):
     if not name or name.lower() == "no data":
         return "Undefined"
-    return name
+    return name.strip()
 
 
 def get_building_typology(data: str):
