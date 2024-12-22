@@ -1,6 +1,11 @@
 # GBDI Converters
 
-Repository for converting various data sources for the GBDI app to ingest.
+Repository for converting various data sources for the [GBDI](https://app.gbdi.io) app to ingest.
+
+## Description
+
+The GBDI app collects building component and whole building LCA (Life Cycle Assessment) data on a global scale to
+provide benchmarks and analytics of whole building LCA across the globe.
 
 ## Formats
 
@@ -9,6 +14,16 @@ Current formats supported:
 - [Structural Panda](/src/structural_panda.py)
 - [CarbEnMats](/src/carbenmats.py)
 - [SLiCE](/src/slice.py)
+- [BECD](/src/becd.py)
+
+## Installation
+
+This repository uses [UV](https://docs.astral.sh/uv/) for dependency management. \
+To install the dependencies, run:
+
+```sh
+uv install
+```
 
 ## Usage
 
@@ -18,3 +33,12 @@ run the following command:
 ```
 python3 src/structural_panda.py
 ```
+
+# Converted Data
+
+Input files as well as converted files are provided in the `data/` directory.
+You can use the input files to test the converters or simply use the already converted files.
+
+# License
+
+This project is licensed under the terms of Apache v2.0, described in the [LICENSE](LICENSE) file.
