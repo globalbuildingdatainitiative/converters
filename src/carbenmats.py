@@ -154,6 +154,11 @@ def get_results(data: dict):
         )
     return results if results[ImpactCategoryKey.gwp] else None
 
+def get_year(data: str):
+    try:
+        return int(data)
+    except ValueError:
+        return None
 
 def convert_row(row: dict):
     results = get_results(row)
@@ -195,7 +200,7 @@ def convert_row(row: dict):
             ),
             roof_type=get_roof_type(row["bldg_roof_type"]),
         ),
-        meta_data={"assessment": { "year": row["meta_year"]}, "source": { "name": "CarbEnMats", "url": None}},
+        meta_data={"assessment": { "year": get_year(row["meta_year"])}, "source": { "name": "CarbEnMats", "url": None}},
         project_phase=ProjectPhase.other,
         results=results,
         software_info=SoftwareInfo(
