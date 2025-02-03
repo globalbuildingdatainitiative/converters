@@ -31,12 +31,14 @@ from lcax import (
 )
 
 logging.config.dictConfig(
-    yaml.safe_load((Path(__file__).parent / "logging.yaml").read_text())
+    yaml.safe_load((Path(__file__).parent.parent / "logging.yaml").read_text())
 )
 log = logging.getLogger(__name__)
 
+MAPPING = json.loads((Path(__file__).parent / "mapping.json").read_text())
 
-def get_location(region: str):
+def get_location(row: dict):
+    region = row[MAPPING["location.country"]]
     region = region.lower()
     if region == "continental":
         country = Country.deu
@@ -52,59 +54,38 @@ def get_location(region: str):
     return Location(country=country, city=None, address=None)
 
 
-def get_building_typology(data: str):
-    if data.lower() in [
-        "single-family house",
-        "multi-family house",
-        # "semi-detached",
-        # "row house",
-    ]:
-        return [BuildingTypology.residential]
-    elif data.lower() in ["office"]:
-        return [BuildingTypology.office]
-    # elif data.lower() in [
-    #     "school and daycare",
-    #     "hospital and health",
-    #     "art & culture",
-    #     "sport & entertainment",
-    # ]:
-    #     return [BuildingTypology.public]
-    # elif data.lower() in ["hotel & resort", "retail and restaurant"]:
-    #     return [BuildingTypology.commercial]
-    # elif data.lower() in ["aviation"]:
-    #     return [BuildingTypology.infrastructure]
-    # elif data.lower() in ["technology & science"]:
-    #     return [BuildingTypology.industrial]
-    # elif data.lower() in ["other", "mixed use", "no data"]:
-    #     return [BuildingTypology.other]
-    else:
-        raise NotImplementedError(f"Unknown building typology: {data}")
+def get_building_typology(row: dict):
+    data = row[MAPPING["project_info.building_typology"]]
+
+    building_typology_keys = [key for key, value in MAPPING.items() if key.startswith("building_typology.") and value]
+
+    for key in building_typology_keys:
+        if data.lower() in MAPPING[key]:
+            return [BuildingTypology[key.split(".")[1]]]
+
+    raise NotImplementedError(f"Unknown building typology: {data}")
 
 
-def get_building_type(data: str):
-    if data.lower() in ["new buildings"]:
-        return BuildingType.new_construction_works
-    # elif data.lower() in ["no data"]:
-    #     return BuildingType.other
-    elif data.lower() in ["refurbishment"]:
-        return BuildingType.retrofit_works
-    elif data.lower() in ["existing buildings"]:
-        return BuildingType.operations
-    else:
-        raise NotImplementedError(f"Unknown building type: {data}")
+def get_building_type(row: dict):
+    data = row[MAPPING["project_info.building_type"]]
+    building_type_keys = [key for key, value in MAPPING.items() if key.startswith("building_type.") and value]
+
+    for key in building_type_keys:
+        if data.lower() in MAPPING[key]:
+            return BuildingType[key.split(".")[1]]
+
+    raise NotImplementedError(f"Unknown building type: {data}")
 
 
-def get_general_energy_class(data: str):
-    if data.lower() in ["standard"]:
-        return GeneralEnergyClass.standard
-    elif data.lower() in ["advanced"]:
-        return GeneralEnergyClass.advanced
-    elif data.lower() in ["average"]:
-        return GeneralEnergyClass.existing
-    # elif data.lower() in ["no data"]:
-    #     return GeneralEnergyClass.unknown
-    else:
-        raise NotImplementedError(f"Unknown energy class: {data}")
+def get_general_energy_class(row: dict):
+    data = row[MAPPING["project_info.general_energy_class"]]
+    _keys = [key for key, value in MAPPING.items() if key.startswith("general_energy_class.") and value]
+
+    for key in _keys:
+        if data.lower() in MAPPING[key]:
+            return GeneralEnergyClass[key.split(".")[1]]
+
+    raise NotImplementedError(f"Unknown general energy class: {data}")
 
 
 class LCAxLifeCycleStage(Enum):
@@ -174,25 +155,8 @@ class LCAxTechFlow(TechFlow):
         self.impacts[key.value][stage] += value
 
     def add_row(self, row: dict):
-        stage = LCAxLifeCycleStage.from_str(row["LCS_EN15978"]).value
-        impact_sets = [
-            (ImpactCategoryKey.gwp, "ind_GWP_Tot"),
-            (ImpactCategoryKey.gwp_bio, "ind_GWP_Bio"),
-            (ImpactCategoryKey.gwp_lul, "ind_GWP_LuLuc"),
-            (ImpactCategoryKey.odp, "ind_ODP"),
-            (ImpactCategoryKey.ap, "ind_AP"),
-            (ImpactCategoryKey.ep_fw, "ind_EP_Fw"),
-            (ImpactCategoryKey.ep_mar, "ind_EP_Mar"),
-            (ImpactCategoryKey.ep_ter, "ind_EP_Ter"),
-            (ImpactCategoryKey.pocp, "ind_PCOP"),
-            (ImpactCategoryKey.wdp, "ind_WDP"),
-            (ImpactCategoryKey.pm, "ind_PM"),
-            (ImpactCategoryKey.irp, "ind_IRP"),
-            (ImpactCategoryKey.etp_fw, "ind_ETP_Fw"),
-            (ImpactCategoryKey.htp_c, "ind_HTP_c"),
-            (ImpactCategoryKey.htp_nc, "ind_HTP_nc"),
-            (ImpactCategoryKey.sqp, "ind_SQP"),
-        ]
+        stage = LCAxLifeCycleStage.from_str(row[MAPPING["life_cycle_stage"]]).value
+        impact_sets = [(ImpactCategoryKey[key.split(".")[1]], MAPPING[key]) for key in MAPPING.keys() if key.startswith("impact_category_key.")]
 
         for impact in impact_sets:
             self.add_impact(impact[0], stage, row[impact[1]])
@@ -218,8 +182,8 @@ class LCAxTechFlow(TechFlow):
             ImpactCategoryKey.sqp: {},
         }
         tech_flow = cls(
-            id=str(uuid5(NAMESPACE_URL, row["techflow_name_mmg"])),
-            name=row["techflow_name_mmg"],
+            id=str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.products.impact_data.id"]])),
+            name=row[MAPPING["assemblies.products.impact_data.name"]],
             declared_unit=Unit.kg,
             format_version=importlib.metadata.version("lcax"),
             source=None,
@@ -244,14 +208,13 @@ class LCAxProduct(Product):
             id=str(
                 uuid5(
                     NAMESPACE_URL,
-                    row["worksection_class_sfb"] or "" + row["techflow_name_mmg"],
+                    row[MAPPING["assemblies.products.id"][0]] or "" + row[MAPPING["assemblies.products.id"][1]]
                 )
             ),
-            name=row["worksection_class_sfb"] or row["techflow_name_mmg"],
+            name=row[MAPPING["assemblies.products.name"][0]] or "" + row[MAPPING["assemblies.products.name"][1]],
             description="",
             reference_service_life=50,
             impact_data=LCAxTechFlow.from_row(row),
-            # quantity=row["amount_material_kg_per_building"] or 0,
             quantity=1,
             unit=Unit.kg,
             transport=None,
@@ -265,13 +228,13 @@ class LCAxAssembly(Assembly):
     @classmethod
     def from_row(cls: Type[Self], row: dict) -> Self:
         return cls(
-            id=str(uuid5(NAMESPACE_URL, row["element_class_sfb"])),
-            name=row["element_class_generic_name"],
+            id=str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.id"]])),
+            name=row[MAPPING["assemblies.name"]],
             classification=[
                 Classification(
                     system="SfB",
-                    code=row["element_class_sfb"],
-                    name=row["element_class_generic_name"],
+                    code=row[MAPPING["assemblies.classification.code"]],
+                    name=row[MAPPING["assemblies.classification.name"]],
                 )
             ],
             quantity=1.0,
@@ -287,9 +250,9 @@ class LCAxProject(Project):
     @classmethod
     def from_row(cls, row: dict):
         return cls(
-            id=str(uuid5(NAMESPACE_URL, row["building_archetype_code"])),
+            id=str(uuid5(NAMESPACE_URL, row[MAPPING["id"]])),
             name="Undefined",
-            location=get_location(row["stock_region_name"]),
+            location=get_location(row),
             impact_categories=[
                 ImpactCategoryKey.gwp,
                 ImpactCategoryKey.gwp_bio,
@@ -334,14 +297,10 @@ class LCAxProject(Project):
                     value=1,
                     definition="",
                 ),
-                building_type=get_building_type(row["stock_activity_type_name"]),
-                building_typology=get_building_typology(
-                    row["building_use_subtype_name"]
-                ),
+                building_type=get_building_type(row),
+                building_typology=get_building_typology(row),
                 floors_above_ground=1,
-                general_energy_class=get_general_energy_class(
-                    row["building_energy_performance_name"]
-                ),
+                general_energy_class=get_general_energy_class(row),
                 roof_type=RoofType.unknown,
             ),
             meta_data={"source": { "name": "SLiCE", "url": None}},
@@ -349,10 +308,10 @@ class LCAxProject(Project):
 
 
 def update_project(project: LCAxProject, row: dict):
-    assembly_id = str(uuid5(NAMESPACE_URL, row["element_class_sfb"]))
+    assembly_id = str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.id"]]))
     product_id = str(
         uuid5(
-            NAMESPACE_URL, row["worksection_class_sfb"] or "" + row["techflow_name_mmg"]
+            NAMESPACE_URL, row[MAPPING["assemblies.products.id"][0]] or "" + row[MAPPING["assemblies.products.id"][1]]
         )
     )
 
@@ -365,7 +324,7 @@ def update_project(project: LCAxProject, row: dict):
         project.assemblies[assembly_id].products[product_id].add_row(row)
 
 
-def get_projects_by_archetypes(file: Path, archetypes: list[str]):
+def get_projects_by_archetypes(file: Path):
     wanted_fields = [
         "stock_region_name",
         "building_use_subtype_name",
@@ -414,6 +373,7 @@ def get_projects_by_archetypes(file: Path, archetypes: list[str]):
         if archetype not in projects:
             log.debug(f"Adding archetype: {archetype}")
             projects[archetype] = LCAxProject.from_row(row)
+
         update_project(projects[archetype], row)
 
     for key, project in projects.items():
@@ -432,86 +392,17 @@ def save_data(data: list[dict], data_folder: Path, filename: str):
     file.write_text(json.dumps(data, indent=2))
 
 
-def get_archetypes():
-    return [
-        "CON_MFH_EXB_AVG",
-        "CON_MFH_NEW_ADV",
-        "CON_MFH_NEW_STD",
-        "CON_MFH_REF_ADV",
-        "CON_MFH_REF_STD",
-        "CON_OFF_EXB_AVG",
-        "CON_OFF_NEW_ADV",
-        "CON_OFF_NEW_STD",
-        "CON_OFF_REF_ADV",
-        "CON_OFF_REF_STD",
-        "CON_SFH_EXB_AVG",
-        "CON_SFH_NEW_ADV",
-        "CON_SFH_NEW_STD",
-        "CON_SFH_REF_ADV",
-        "CON_SFH_REF_STD",
-        # ---
-        "MED_MFH_EXB_AVG",
-        "MED_MFH_NEW_ADV",
-        "MED_MFH_NEW_STD",
-        "MED_MFH_REF_ADV",
-        "MED_MFH_REF_STD",
-        "MED_OFF_EXB_AVG",
-        "MED_OFF_NEW_ADV",
-        "MED_OFF_NEW_STD",
-        "MED_OFF_REF_ADV",
-        "MED_OFF_REF_STD",
-        "MED_SFH_EXB_AVG",
-        "MED_SFH_NEW_ADV",
-        "MED_SFH_NEW_STD",
-        "MED_SFH_REF_ADV",
-        "MED_SFH_REF_STD",
-        # ---
-        "NOR_MFH_EXB_AVG",
-        "NOR_MFH_NEW_ADV",
-        "NOR_MFH_NEW_STD",
-        "NOR_MFH_REF_ADV",
-        "NOR_MFH_REF_STD",
-        "NOR_OFF_EXB_AVG",
-        "NOR_OFF_NEW_ADV",
-        "NOR_OFF_NEW_STD",
-        "NOR_OFF_REF_ADV",
-        "NOR_OFF_REF_STD",
-        "NOR_SFH_EXB_AVG",
-        "NOR_SFH_NEW_ADV",
-        "NOR_SFH_NEW_STD",
-        "NOR_SFH_REF_ADV",
-        "NOR_SFH_REF_STD",
-        # ---
-        "OCE_MFH_EXB_AVG",
-        "OCE_MFH_NEW_ADV",
-        "OCE_MFH_NEW_STD",
-        "OCE_MFH_REF_ADV",
-        "OCE_MFH_REF_STD",
-        "OCE_OFF_EXB_AVG",
-        "OCE_OFF_NEW_ADV",
-        "OCE_OFF_NEW_STD",
-        "OCE_OFF_REF_ADV",
-        "OCE_OFF_REF_STD",
-        "OCE_SFH_EXB_AVG",
-        "OCE_SFH_NEW_ADV",
-        "OCE_SFH_NEW_STD",
-        "OCE_SFH_REF_ADV",
-        "OCE_SFH_REF_STD",
-    ]
-
-
 def load_slice(data_folder: Path, filename: str):
     file = data_folder / filename
     log.info(f"Loading SLiCE from file: {file}")
 
-    archetypes = get_archetypes()
-    lcax_data = get_projects_by_archetypes(file, archetypes)
+    lcax_data = get_projects_by_archetypes(file)
 
     save_data(lcax_data, data_folder, filename.replace(".parquet", ".json"))
 
 
 if __name__ == "__main__":
-    _data_folder = Path(__file__).parent.parent / "data"
+    _data_folder = Path(__file__).parent.parent.parent / "data"
     _filename = "slice_20240319.parquet"
 
     load_slice(_data_folder, _filename)

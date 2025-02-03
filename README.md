@@ -11,10 +11,10 @@ provide benchmarks and analytics of whole building LCA across the globe.
 
 Current formats supported:
 
-- [Structural Panda](/src/structural_panda.py)
-- [CarbEnMats](/src/carbenmats.py)
-- [SLiCE](/src/slice.py)
-- [BECD](/src/becd.py)
+- [Structural Panda](src/structural_panda/structural_panda.py)
+- [CarbEnMats](src/carbenmats/carbenmats.py)
+- [SLiCE](src/slice/slice.py)
+- [BECD](src/becd/becd.py)
 
 ## Installation
 
@@ -31,7 +31,7 @@ To run a converter, simply run the python file in the src directory. For example
 run the following command:
 
 ```
-python3 src/structural_panda.py
+python3 src/structural_panda/structural_panda.py
 ```
 
 # Converted Data
