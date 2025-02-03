@@ -37,6 +37,7 @@ log = logging.getLogger(__name__)
 
 MAPPING = json.loads((Path(__file__).parent / "mapping.json").read_text())
 
+
 def get_location(row: dict):
     region = row[MAPPING["location.country"]]
     region = region.lower()
@@ -57,7 +58,11 @@ def get_location(row: dict):
 def get_building_typology(row: dict):
     data = row[MAPPING["project_info.building_typology"]]
 
-    building_typology_keys = [key for key, value in MAPPING.items() if key.startswith("building_typology.") and value]
+    building_typology_keys = [
+        key
+        for key, value in MAPPING.items()
+        if key.startswith("building_typology.") and value
+    ]
 
     for key in building_typology_keys:
         if data.lower() in MAPPING[key]:
@@ -68,7 +73,11 @@ def get_building_typology(row: dict):
 
 def get_building_type(row: dict):
     data = row[MAPPING["project_info.building_type"]]
-    building_type_keys = [key for key, value in MAPPING.items() if key.startswith("building_type.") and value]
+    building_type_keys = [
+        key
+        for key, value in MAPPING.items()
+        if key.startswith("building_type.") and value
+    ]
 
     for key in building_type_keys:
         if data.lower() in MAPPING[key]:
@@ -79,7 +88,11 @@ def get_building_type(row: dict):
 
 def get_general_energy_class(row: dict):
     data = row[MAPPING["project_info.general_energy_class"]]
-    _keys = [key for key, value in MAPPING.items() if key.startswith("general_energy_class.") and value]
+    _keys = [
+        key
+        for key, value in MAPPING.items()
+        if key.startswith("general_energy_class.") and value
+    ]
 
     for key in _keys:
         if data.lower() in MAPPING[key]:
@@ -156,7 +169,11 @@ class LCAxTechFlow(TechFlow):
 
     def add_row(self, row: dict):
         stage = LCAxLifeCycleStage.from_str(row[MAPPING["life_cycle_stage"]]).value
-        impact_sets = [(ImpactCategoryKey[key.split(".")[1]], MAPPING[key]) for key in MAPPING.keys() if key.startswith("impact_category_key.")]
+        impact_sets = [
+            (ImpactCategoryKey[key.split(".")[1]], MAPPING[key])
+            for key in MAPPING.keys()
+            if key.startswith("impact_category_key.")
+        ]
 
         for impact in impact_sets:
             self.add_impact(impact[0], stage, row[impact[1]])
@@ -182,7 +199,9 @@ class LCAxTechFlow(TechFlow):
             ImpactCategoryKey.sqp: {},
         }
         tech_flow = cls(
-            id=str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.products.impact_data.id"]])),
+            id=str(
+                uuid5(NAMESPACE_URL, row[MAPPING["assemblies.products.impact_data.id"]])
+            ),
             name=row[MAPPING["assemblies.products.impact_data.name"]],
             declared_unit=Unit.kg,
             format_version=importlib.metadata.version("lcax"),
@@ -208,10 +227,12 @@ class LCAxProduct(Product):
             id=str(
                 uuid5(
                     NAMESPACE_URL,
-                    row[MAPPING["assemblies.products.id"][0]] or "" + row[MAPPING["assemblies.products.id"][1]]
+                    row[MAPPING["assemblies.products.id"][0]]
+                    or "" + row[MAPPING["assemblies.products.id"][1]],
                 )
             ),
-            name=row[MAPPING["assemblies.products.name"][0]] or "" + row[MAPPING["assemblies.products.name"][1]],
+            name=row[MAPPING["assemblies.products.name"][0]]
+            or "" + row[MAPPING["assemblies.products.name"][1]],
             description="",
             reference_service_life=50,
             impact_data=LCAxTechFlow.from_row(row),
@@ -303,7 +324,7 @@ class LCAxProject(Project):
                 general_energy_class=get_general_energy_class(row),
                 roof_type=RoofType.unknown,
             ),
-            meta_data={"source": { "name": "SLiCE", "url": None}},
+            meta_data={"source": {"name": "SLiCE", "url": None}},
         )
 
 
@@ -311,7 +332,9 @@ def update_project(project: LCAxProject, row: dict):
     assembly_id = str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.id"]]))
     product_id = str(
         uuid5(
-            NAMESPACE_URL, row[MAPPING["assemblies.products.id"][0]] or "" + row[MAPPING["assemblies.products.id"][1]]
+            NAMESPACE_URL,
+            row[MAPPING["assemblies.products.id"][0]]
+            or "" + row[MAPPING["assemblies.products.id"][1]],
         )
     )
 

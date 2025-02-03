@@ -33,7 +33,11 @@ MAPPING = json.loads((Path(__file__).parent / "mapping.json").read_text())
 def get_building_typology(row: dict):
     data = row[MAPPING["project_info.building_typology"]]
 
-    building_typology_keys = [key for key, value in MAPPING.items() if key.startswith("building_typology.") and value]
+    building_typology_keys = [
+        key
+        for key, value in MAPPING.items()
+        if key.startswith("building_typology.") and value
+    ]
     building_typology = []
     for key in building_typology_keys:
         if data.lower() in MAPPING[key]:
@@ -46,7 +50,11 @@ def get_building_typology(row: dict):
 
 def get_building_type(row: dict):
     data = row[MAPPING["project_info.building_type"]]
-    building_type_keys = [key for key, value in MAPPING.items() if key.startswith("building_type.") and value]
+    building_type_keys = [
+        key
+        for key, value in MAPPING.items()
+        if key.startswith("building_type.") and value
+    ]
 
     for key in building_type_keys:
         if data.lower() in MAPPING[key]:
@@ -57,16 +65,20 @@ def get_building_type(row: dict):
 
 def get_results(row: dict):
     results = {ImpactCategoryKey.gwp: {}}
-    result_items = [(key, value) for key, value in MAPPING.items() if key.startswith("results.") and value]
+    result_items = [
+        (key, value)
+        for key, value in MAPPING.items()
+        if key.startswith("results.") and value
+    ]
     for key, value in result_items:
         if key == "results.gwp.a5":
-            results[ImpactCategoryKey[key.split(".")[1]]][LifeCycleStage[key.split(".")[2]]] = (
-                    float(row[value[0]]) + float(row[value[1]])
-            )
+            results[ImpactCategoryKey[key.split(".")[1]]][
+                LifeCycleStage[key.split(".")[2]]
+            ] = float(row[value[0]]) + float(row[value[1]])
         elif row[value]:
-            results[ImpactCategoryKey[key.split(".")[1]]][LifeCycleStage[key.split(".")[2]]] = (
-                float(row[value])
-            )
+            results[ImpactCategoryKey[key.split(".")[1]]][
+                LifeCycleStage[key.split(".")[2]]
+            ] = float(row[value])
 
     return results if results[ImpactCategoryKey.gwp] else None
 
@@ -79,13 +91,17 @@ def convert_row(row: dict):
         format_version=importlib.metadata.version("lcax"),
         id=str(uuid5(NAMESPACE_URL, json.dumps(row))),
         impact_categories=list(results.keys()) if results else [],
-        life_cycle_stages=list(results[ImpactCategoryKey.gwp].keys()) if results else [],
+        life_cycle_stages=list(results[ImpactCategoryKey.gwp].keys())
+        if results
+        else [],
         location=Location(country=Country.gbr),
         name="Undefined",
         project_info=ProjectInfo(
             type="buildingInfo",
             gross_floor_area=AreaType(
-                unit=Unit.m2, value=row[MAPPING["project_info.gross_floor_area.value"]], definition="GIFA"
+                unit=Unit.m2,
+                value=row[MAPPING["project_info.gross_floor_area.value"]],
+                definition="GIFA",
             ),
             building_type=get_building_type(row),
             building_typology=get_building_typology(row),
@@ -94,8 +110,10 @@ def convert_row(row: dict):
             general_energy_class=GeneralEnergyClass.unknown,
             roof_type=RoofType.other,
         ),
-        meta_data={"assessment": {"year": row[MAPPING["meta_data.assessment.year"]]},
-                   "source": {"name": "StructuralPanda", "url": None}},
+        meta_data={
+            "assessment": {"year": row[MAPPING["meta_data.assessment.year"]]},
+            "source": {"name": "StructuralPanda", "url": None},
+        },
         project_phase=ProjectPhase.other,
         results=results,
         software_info=SoftwareInfo(
