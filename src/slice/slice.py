@@ -36,6 +36,7 @@ logging.config.dictConfig(
 log = logging.getLogger(__name__)
 
 MAPPING = json.loads((Path(__file__).parent / "mapping.json").read_text())
+CLASS_MAPPING = json.loads((Path(__file__).parent / "element_class_mapping.json").read_text())
 
 
 def get_location(row: dict):
@@ -49,6 +50,10 @@ def get_location(row: dict):
         country = Country.swe
     elif region == "oceanic":
         country = Country.gbr
+    elif region == "be":
+        country = Country.bel
+    elif region == "at":
+        country = Country.aut
     else:
         country = Country.deu
 
@@ -232,7 +237,7 @@ class LCAxProduct(Product):
                 )
             ),
             name=row[MAPPING["assemblies.products.name"][0]]
-            or "" + row[MAPPING["assemblies.products.name"][1]],
+                 or "" + row[MAPPING["assemblies.products.name"][1]],
             description="",
             reference_service_life=50,
             impact_data=LCAxTechFlow.from_row(row),
@@ -245,6 +250,27 @@ class LCAxProduct(Product):
         )
 
 
+class LCAxClassification(Classification):
+
+    @classmethod
+    def from_row(cls: Type[Self], row: dict, system) -> Self:
+        code, *name = row[MAPPING["assemblies.classification.code"]].split(" ")
+        if system.lower() == 'sfb':
+            return cls(
+                system="SfB",
+                code=code,
+                name=" ".join(name),
+            )
+        if system.lower() == 'nrms3':
+            nrms3 = CLASS_MAPPING[row[MAPPING["assemblies.classification.code"]].lower()]
+            code, *name = nrms3.split(" ")
+            return cls(
+                system="NRMS3",
+                code=code,
+                name=" ".join(name),
+            )
+
+
 class LCAxAssembly(Assembly):
     @classmethod
     def from_row(cls: Type[Self], row: dict) -> Self:
@@ -252,11 +278,8 @@ class LCAxAssembly(Assembly):
             id=str(uuid5(NAMESPACE_URL, row[MAPPING["assemblies.id"]])),
             name=row[MAPPING["assemblies.name"]],
             classification=[
-                Classification(
-                    system="SfB",
-                    code=row[MAPPING["assemblies.classification.code"]],
-                    name=row[MAPPING["assemblies.classification.name"]],
-                )
+                LCAxClassification.from_row(row, system="SfB"),
+                LCAxClassification.from_row(row, system="NRMS3"),
             ],
             quantity=1.0,
             unit=Unit.kg,
@@ -426,7 +449,9 @@ def load_slice(data_folder: Path, filename: str):
 
 if __name__ == "__main__":
     _data_folder = Path(__file__).parent.parent.parent / "data"
-    _filename = "slice_20240319.parquet"
+    file_names = ["slice_belgium_20250212.parquet", "slice_austria_20250212.parquet", "slice_20240319.parquet"]
 
-    load_slice(_data_folder, _filename)
+    for _filename in file_names:
+        load_slice(_data_folder, _filename)
+
     log.info("SLiCE loaded")
