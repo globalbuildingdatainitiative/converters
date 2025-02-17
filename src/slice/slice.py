@@ -49,6 +49,10 @@ def get_location(row: dict):
         country = Country.swe
     elif region == "oceanic":
         country = Country.gbr
+    elif region == "be":
+        country = Country.bel
+    elif region == "at":
+        country = Country.aut
     else:
         country = Country.deu
 
@@ -426,7 +430,9 @@ def load_slice(data_folder: Path, filename: str):
 
 if __name__ == "__main__":
     _data_folder = Path(__file__).parent.parent.parent / "data"
-    _filename = "slice_20240319.parquet"
+    file_names = ["slice_belgium_20250212.parquet", "slice_austria_20250212.parquet", "slice_20240319.parquet"]
 
-    load_slice(_data_folder, _filename)
+    for _filename in file_names:
+        load_slice(_data_folder, _filename)
+
     log.info("SLiCE loaded")
