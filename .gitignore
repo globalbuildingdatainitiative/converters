@@ -162,3 +162,6 @@ cython_debug/
 .idea/
 
 *.parquet
+/data/slice_20240319.json
+/data/slice_austria_20250212.json
+/data/slice_belgium_20250212.json
